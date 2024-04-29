@@ -1,5 +1,4 @@
 const Sentry = require('@sentry/node');
-// import { nodeProfilingIntegration } from '@sentry/profiling-node';
 const { config } = require('dotenv');
 
 config();
@@ -8,10 +7,6 @@ Sentry.init({
   dsn: process.env.DSN,
   integrations: [
     Sentry.httpIntegration({ tracing: true, breadcrumbs: true }),
-
-  // // I commented out this line, but nothing changed:
-  // nodeProfilingIntegration(),
-  //  Sentry.expressIntegration(),
   ],
   tracesSampleRate: 1.0,
   profilesSampleRate: 1.0,
@@ -21,27 +16,12 @@ const express = require('express');
 
 const app = express();
 
-let currentScope;
-let isolatedScope;
-
-app.get("/transaction", function rootHandler(req, res) {
-  const message = 'It\'s a transaction.';
-  // Sentry.addBreadcrumb({ message });
-
-  // Sentry.withIsolationScope((scope) => {
-  //   scope.clearBreadcrumbs();
-  //   scope.addBreadcrumb({message: `Bredcrumb in scope! spanId: ${scope.getPropagationContext.spanId}` })
-  //   console.log(message, ', scope: ', scope.getScopeData());
-  // });
+app.get("/breadcrumb/:name", function rootHandler(req, res) {
   Sentry.addBreadcrumb({
-    message: `The ${Sentry.getCurrentScope() === currentScope ? 'same' : 'new'} current scope, `
-      + `the ${Sentry.getIsolationScope() === isolatedScope ? 'same' : 'new'} isolation scope.`
+    message: `It's a breadcrum for "${req.params.name}"`
   })
 
-  currentScope = Sentry.getCurrentScope();
-  isolatedScope = Sentry.getIsolationScope();
-
-  res.end("Hello world!");
+  res.end(req.params.name);
 });
 
 app.get("/error", function mainHandler(req, res) {

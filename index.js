@@ -2,7 +2,7 @@ const Sentry = require('@sentry/node');
 const { config } = require('dotenv');
 
 config();
-Sentry.get
+
 Sentry.init({
   dsn: process.env.DSN,
   integrations: [
